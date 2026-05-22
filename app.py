@@ -73,7 +73,8 @@ p, span, div, h1, h2, h3, h4, label { color: #e6edf3; }
 
 @st.cache_resource
 def load_model():
-    return joblib.load(r'C:\Users\youg7\dust_project\models\xgb_model.pkl')
+    return joblib.load('xgb_model.pkl')
+
 
 @st.cache_data
 def load_data():
