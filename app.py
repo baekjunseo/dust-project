@@ -81,7 +81,7 @@ def load_data():
     DF = pd.read_csv('final_data.csv', encoding='UTF-8-SIG')
     
  
-    df['datetime'] = pd.to_datetime(df['datetime'])
+    DF['datetime'] = pd.to_datetime(DF['datetime'])
     return df
 
 # 실시간 API
