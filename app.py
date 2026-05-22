@@ -78,7 +78,7 @@ def load_model():
 
 @st.cache_data
 def load_data():
-     DF = pd.read_csv('final_data.csv', encoding='UTF-8-SIG')
+    DF = pd.read_csv('final_data.csv', encoding='UTF-8-SIG')
     
  
     df['datetime'] = pd.to_datetime(df['datetime'])
