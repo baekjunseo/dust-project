@@ -113,8 +113,7 @@ df = load_data()
 le_season = LabelEncoder()
 le_region = LabelEncoder()
 le_season.fit(df['season'])
-le_region.fit(df['시도'])
-
+le_region.fit(df['region_key'])
 def get_grade(v):
     if v <= 15:   return '좋음', '#2ea043'
     elif v <= 35: return '보통', '#d29922'
