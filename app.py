@@ -79,10 +79,8 @@ def load_model():
 @st.cache_data
 def load_data():
     DF = pd.read_csv('final_data.csv', encoding='UTF-8-SIG')
-    
- 
-   DF['date'] = pd.to_datetime(DF['date'])
-    return df
+    DF['date'] = pd.to_datetime(DF['date'])
+    return DF
 
 # 실시간 API
 @st.cache_data(ttl=3600)
