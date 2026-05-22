@@ -5,6 +5,7 @@ import joblib
 import requests
 from gtts import gTTS
 from datetime import datetime, timedelta
+from sklearn.preprocessing import LabelEncoder
 import plotly.graph_objects as go
 
 API_KEY = '05689212741b54403fce3234b24229211ca799d76d07ddb84604d91c56f403bd'
@@ -47,7 +48,14 @@ def get_realtime(sido):
     except:
         return None, None, None
 
-REGIONS = ['강원','경기','경남','경북','광주','대구','대전','부산','서울','세종','울산','인천','전남','전북','제주','충남','충북']
+model = load_model()
+df = load_data()
+
+# LabelEncoder - season(숫자), region_key(문자)
+le_season = LabelEncoder()
+le_region = LabelEncoder()
+le_season.fit(df['season'])
+le_region.fit(df['region_key'])
 
 def get_season_num(m):
     if m in [3,4,5]: return 2
@@ -60,9 +68,6 @@ def get_season_str(m):
     elif m in [6,7,8]: return '여름'
     elif m in [9,10,11]: return '가을'
     else: return '겨울'
-
-def region_enc(r):
-    return REGIONS.index(r) if r in REGIONS else 0
 
 def get_grade(v):
     if v <= 15: return '좋음', '#2ea043'
@@ -78,19 +83,35 @@ def get_grade_pm10(v):
 
 def predict(rdf, month, day, hour, weekday, pm25_now=None):
     lag1 = pm25_now if pm25_now else rdf['PM25_avg'].iloc[-1]
+    # 없는 컬럼은 있는 데이터로 근사
+    lag3 = rdf['PM25_avg'].iloc[-3] if len(rdf) >= 3 else lag1
+    lag7 = rdf['PM25_lag7'].iloc[-1] if 'PM25_lag7' in rdf.columns else lag1
+    lag24 = rdf['PM25_avg'].iloc[-7] if len(rdf) >= 7 else lag1
+    avg6 = rdf['PM25_avg'].tail(6).mean()
+    avg24 = rdf['PM25_avg'].tail(24).mean() if len(rdf) >= 7 else lag1
+    pm10 = rdf['PM10_avg'].mean()
+
     p = {
-        'month': month, 'day': day, 'hour': hour, 'weekday': weekday,
-        'season': get_season_num(month),
-        'region_enc': region_enc(rdf['region_key'].iloc[0]),
-        'PM10_avg': rdf['PM10_avg'].mean(), 'ws_avg': rdf['ws_avg'].mean(),
-        'ta_avg': rdf['ta_avg'].mean(), 'hm_avg': rdf['hm_avg'].mean(),
-        'pa_avg': rdf['pa_avg'].mean(), 'rn_day': rdf['rn_day'].mean(),
-        'PM25_lag1': lag1, 'PM25_lag7': rdf['PM25_lag7'].iloc[-1],
+        'month': month,
+        'day': day,
+        'hour': hour,
+        'weekday': weekday,
+        'season_enc': le_season.transform([get_season_num(month)])[0],
+        'region_enc': le_region.transform([rdf['region_key'].iloc[0]])[0],
+        'PM10': pm10,
+        'ws_avg': rdf['ws_avg'].mean(),
+        'ta_avg': rdf['ta_avg'].mean(),
+        'hm_avg': rdf['hm_avg'].mean(),
+        'pa_avg': rdf['pa_avg'].mean(),
+        'rn_day': rdf['rn_day'].mean(),
+        'PM25_lag1': lag1,
+        'PM25_lag3': lag3,
+        'PM25_lag24': lag24,
+        'PM25_avg6': avg6,
+        'PM25_avg24': avg24,
     }
     return max(0, model.predict(pd.DataFrame([p]))[0])
 
-model = load_model()
-df = load_data()
 now = datetime.now()
 regions = sorted(df['region_key'].unique())
 
