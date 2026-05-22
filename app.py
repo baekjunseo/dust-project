@@ -75,14 +75,12 @@ p, span, div, h1, h2, h3, h4, label { color: #e6edf3; }
 def load_model():
     return joblib.load('xgb_model.pkl')
 
-
 @st.cache_data
 def load_data():
     DF = pd.read_csv('final_data.csv', encoding='UTF-8-SIG')
     DF['date'] = pd.to_datetime(DF['date'])
     return DF
 
-# 실시간 API
 @st.cache_data(ttl=3600)
 def get_realtime(sido):
     try:
@@ -114,6 +112,7 @@ le_season = LabelEncoder()
 le_region = LabelEncoder()
 le_season.fit(df['season'])
 le_region.fit(df['region_key'])
+
 def get_grade(v):
     if v <= 15:   return '좋음', '#2ea043'
     elif v <= 35: return '보통', '#d29922'
@@ -127,26 +126,25 @@ def get_season_str(m):
     else: return '겨울'
 
 def predict(rdf, month, day, hour, weekday, pm25_now=None):
-    lag1 = pm25_now if pm25_now else rdf['PM25'].iloc[-1]
+    lag1 = pm25_now if pm25_now else rdf['PM25_avg'].iloc[-1]
     p = {
         'month': month, 'day': day, 'hour': hour, 'weekday': weekday,
         'season_enc': le_season.transform([get_season_str(month)])[0],
-        'region_enc': le_region.transform([rdf['시도'].iloc[0]])[0],
-        'PM10': rdf['PM10'].mean(), 'ws_avg': rdf['ws_avg'].mean(),
-        'ta_avg': rdf['ta_avg'].mean(), 'hm_avg': rdf['hm_avg'].mean(),
-        'pa_avg': rdf['pa_avg'].mean(), 'rn_day': rdf['rn_day'].mean(),
+        'region_enc': le_region.transform([rdf['region_key'].iloc[0]])[0],
+        'PM10_avg': rdf['PM10_avg'].mean(),
+        'ws_avg': rdf['ws_avg'].mean(),
+        'ta_avg': rdf['ta_avg'].mean(),
+        'hm_avg': rdf['hm_avg'].mean(),
+        'pa_avg': rdf['pa_avg'].mean(),
+        'rn_day': rdf['rn_day'].mean(),
         'PM25_lag1': lag1,
-        'PM25_lag3': rdf['PM25'].iloc[-3] if len(rdf)>=3 else lag1,
-        'PM25_lag24': rdf['PM25'].iloc[-24] if len(rdf)>=24 else lag1,
-        'PM25_avg6': rdf['PM25'].tail(6).mean(),
-        'PM25_avg24': rdf['PM25'].tail(24).mean(),
+        'PM25_lag7': rdf['PM25_lag7'].iloc[-1] if len(rdf) >= 1 else lag1,
     }
     return max(0, model.predict(pd.DataFrame([p]))[0])
 
 now = datetime.now()
 regions = sorted(df['region_key'].unique())
 
-# 헤더
 hc1, hc2, hc3 = st.columns([3,1,1])
 with hc1:
     st.markdown("""
@@ -166,15 +164,13 @@ with hc3:
 
 st.markdown('<hr style="border-color:#30363d; margin:0 0 16px 0;">', unsafe_allow_html=True)
 
-# 실시간 데이터
 rt_pm25, rt_pm10, rt_time = get_realtime(selected)
 
 rdf = df[df['region_key']==selected].sort_values('date').tail(48)
 latest = rdf.iloc[-1]
 
-# 실시간 값 있으면 사용, 없으면 과거 데이터
-current_pm25 = rt_pm25 if rt_pm25 else rdf['PM25'].iloc[-1]
-current_pm10 = rt_pm10 if rt_pm10 else latest['PM10']
+current_pm25 = rt_pm25 if rt_pm25 else rdf['PM25_avg'].iloc[-1]
+current_pm10 = rt_pm10 if rt_pm10 else latest['PM10_avg']
 
 today_v = predict(rdf, now.month, now.day, now.hour, now.weekday(), current_pm25)
 tmr = now + timedelta(days=1)
@@ -185,19 +181,16 @@ tmr_g, tmr_c = get_grade(tmr_v)
 rt_g, rt_c = get_grade(current_pm25)
 pm10_g, pm10_c = get_grade(current_pm10*0.6)
 
-# 실시간 표시
 if rt_pm25:
     st.markdown(f"""
     <div style="background:#1c2128; border:1px solid #30363d; border-radius:10px;
         padding:10px 16px; margin-bottom:12px; display:flex; gap:8px; align-items:center;">
-        <div style="width:8px; height:8px; border-radius:50%; background:#2ea043;
-            animation:pulse 2s infinite;"></div>
+        <div style="width:8px; height:8px; border-radius:50%; background:#2ea043;"></div>
         <div style="font-size:0.82rem; color:#8b949e;">
             실시간 데이터 연동 중 &nbsp;|&nbsp; 측정시각: {rt_time}
         </div>
     </div>""", unsafe_allow_html=True)
 
-# 음성
 voice_txt = f"오늘 {selected} 초미세먼지는 {rt_g}입니다. 현재 농도 {current_pm25:.0f} 마이크로그램. 내일은 {tmr_v:.0f} 마이크로그램으로 {tmr_g} 예상됩니다."
 st.markdown(f"""
 <div style="background:#1c2128; border:1px solid #238636; border-radius:10px;
@@ -218,7 +211,6 @@ tts.save('voice.mp3')
 with open('voice.mp3','rb') as f:
     st.audio(f.read(), format='audio/mp3', autoplay=True)
 
-# 지표 4개
 c1,c2,c3,c4 = st.columns(4)
 for col, lbl, val, unit, grade, color, icon in [
     (c1,'실시간 PM2.5', f'{current_pm25:.0f}','μg/m³', rt_g, rt_c, '&#127787;'),
@@ -238,10 +230,9 @@ for col, lbl, val, unit, grade, color, icon in [
                 border:1px solid {color}44;">{grade}</span>
         </div>""", unsafe_allow_html=True)
 
-# 7일 예측 카드 (탭으로 PM2.5 / PM10 구분)
 dates_7 = [now + timedelta(days=i) for i in range(7)]
 pred_7 = [predict(rdf, d.month, d.day, 12, d.weekday(), current_pm25) for d in dates_7]
-pred_7_pm10 = [v * 1.8 for v in pred_7]  # PM10 추정 (PM2.5 * 1.8 비율)
+pred_7_pm10 = [v * 1.8 for v in pred_7]
 day_names = ['오늘','내일','모레','3일후','4일후','5일후','6일후']
 weekday_kr = ['월','화','수','목','금','토','일']
 weather_icons = ['&#9728;','&#9925;','&#9729;','&#127783;','&#127781;','&#9728;','&#9925;']
@@ -256,8 +247,7 @@ tab1, tab2 = st.tabs(['&#127787; 초미세먼지 PM2.5', '&#127748; 미세먼지
 
 with tab1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="sec-title">&#128197; {selected} 7일 PM2.5 예측</div>',
-                unsafe_allow_html=True)
+    st.markdown(f'<div class="sec-title">&#128197; {selected} 7일 PM2.5 예측</div>', unsafe_allow_html=True)
     cols_7 = st.columns(7)
     for i, (col, d, v, dn) in enumerate(zip(cols_7, dates_7, pred_7, day_names)):
         g, c = get_grade(v)
@@ -283,8 +273,7 @@ with tab1:
 
 with tab2:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="sec-title">&#128197; {selected} 7일 PM10 예측</div>',
-                unsafe_allow_html=True)
+    st.markdown(f'<div class="sec-title">&#128197; {selected} 7일 PM10 예측</div>', unsafe_allow_html=True)
     cols_7b = st.columns(7)
     for i, (col, d, v, dn) in enumerate(zip(cols_7b, dates_7, pred_7_pm10, day_names)):
         g, c = get_grade_pm10(v)
@@ -308,7 +297,6 @@ with tab2:
             </div>""", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 막대그래프 + 행동가이드
 gl, gr = st.columns([3,2])
 with gl:
     fig = go.Figure()
@@ -340,8 +328,7 @@ with gl:
                    title='PM2.5 (μg/m³)', range=[0, max(pred_7)*1.4])
     )
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="sec-title">&#128202; 7일 PM2.5 예측 농도</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">&#128202; 7일 PM2.5 예측 농도</div>', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -381,12 +368,10 @@ with gr:
         </div>""", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 원인분석 + 과거비교
 al, ar = st.columns([3,2])
 with al:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="sec-title">&#128269; 원인 분석 (현재 기상 조건)</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">&#128269; 원인 분석 (현재 기상 조건)</div>', unsafe_allow_html=True)
     factors = [
         ('&#128168; 풍속', latest['ws_avg']/10*100,
          f"{latest['ws_avg']:.1f} m/s", '낮을수록 미세먼지 나쁨'),
@@ -406,32 +391,26 @@ with al:
         <div style="margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                 <div>
-                    <span style="font-size:0.85rem; color:#e6edf3; font-weight:600;">
-                        {name}
-                    </span>
-                    <span style="font-size:0.75rem; color:#8b949e; margin-left:8px;">
-                        {hint}
-                    </span>
+                    <span style="font-size:0.85rem; color:#e6edf3; font-weight:600;">{name}</span>
+                    <span style="font-size:0.75rem; color:#8b949e; margin-left:8px;">{hint}</span>
                 </div>
                 <span style="font-size:0.85rem; color:{c}; font-weight:600;">{display}</span>
             </div>
             <div style="background:#0d1117; border-radius:6px; height:8px; overflow:hidden;">
-                <div style="width:{pct}%; height:100%; background:{c}; border-radius:6px;">
-                </div>
+                <div style="width:{pct}%; height:100%; background:{c}; border-radius:6px;"></div>
             </div>
         </div>""", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with ar:
-    lm = df[(df['시도']==selected)&
-            (df['datetime'].dt.month==(now.month-1 if now.month>1 else 12))]['PM25'].mean()
-    ly = df[(df['시도']==selected)&
-            (df['datetime'].dt.year==now.year-1)&
-            (df['datetime'].dt.month==now.month)]['PM25'].mean()
+    lm = df[(df['region_key']==selected)&
+            (df['date'].dt.month==(now.month-1 if now.month>1 else 12))]['PM25_avg'].mean()
+    ly = df[(df['region_key']==selected)&
+            (df['date'].dt.year==now.year-1)&
+            (df['date'].dt.month==now.month)]['PM25_avg'].mean()
 
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="sec-title">&#128197; 과거 대비 비교</div>',
-                unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">&#128197; 과거 대비 비교</div>', unsafe_allow_html=True)
 
     for lbl, val, diff_v in [
         ('현재 실시간', current_pm25, None),
@@ -451,10 +430,8 @@ with ar:
         </div>""", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# 등급 기준
 st.markdown('<div class="card">', unsafe_allow_html=True)
-st.markdown('<div class="sec-title">&#128204; PM2.5 위험 등급 기준 (AirKorea 기준)</div>',
-            unsafe_allow_html=True)
+st.markdown('<div class="sec-title">&#128204; PM2.5 위험 등급 기준 (AirKorea 기준)</div>', unsafe_allow_html=True)
 gc1,gc2,gc3,gc4 = st.columns(4)
 for col, g, c, rng, desc, icon in [
     (gc1,'좋음','#2ea043','0 ~ 15 μg/m³','야외활동 자유롭게','&#128994;'),
