@@ -144,7 +144,7 @@ def predict(rdf, month, day, hour, weekday, pm25_now=None):
     return max(0, model.predict(pd.DataFrame([p]))[0])
 
 now = datetime.now()
-regions = sorted(df['시도'].unique())
+egions = sorted(df['region_key'].unique())
 
 # 헤더
 hc1, hc2, hc3 = st.columns([3,1,1])
