@@ -78,8 +78,8 @@ def load_model():
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r'C:\Users\youg7\dust_project\data\processed\air_quality_clean.csv',
-                     encoding='utf-8-sig')
+    DF = pd.read_csv('air_quality_clean.csv', encoding='UTF-8-SIG')
+    
     df['datetime'] = pd.to_datetime(df['datetime'])
     return df
 
