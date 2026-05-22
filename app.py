@@ -169,7 +169,7 @@ st.markdown('<hr style="border-color:#30363d; margin:0 0 16px 0;">', unsafe_allo
 # 실시간 데이터
 rt_pm25, rt_pm10, rt_time = get_realtime(selected)
 
-rdf = df[df['시도']==selected].sort_values('datetime').tail(48)
+rdf = df[df['region_key']==selected].sort_values('date').tail(48)
 latest = rdf.iloc[-1]
 
 # 실시간 값 있으면 사용, 없으면 과거 데이터
