@@ -91,7 +91,11 @@ streamlit run app.py
 
 
 > 스크린<img width="2866" height="1198" alt="image" src="https://github.com/user-attachments/assets/cdabf346-a176-44e3-bc94-dc1cc22cc26f" />
-샷을 추가하면 더욱 풍성한 포트폴리오가 됩니다!
+
+샷을 추가하면 더욱 풍성한 포트폴리오가 됩니다!<img width="2878" height="1490" alt="image" src="https://github.com/user-attachments/assets/eb9cd7d2-39eb-4214-a2d4-0114259970ef" />
+
+<img width="2852" height="1486" alt="image" src="https://github.com/user-attachments/assets/a7aa62c7-3a07-45c5-8ed3-5f4d9905e6ee" />
+
 
 ---
 
