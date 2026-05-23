@@ -89,7 +89,9 @@ streamlit run app.py
 
 ## 📸 스크린샷
 
-> 스크린샷을 추가하면 더욱 풍성한 포트폴리오가 됩니다!
+
+> 스크린<img width="2866" height="1198" alt="image" src="https://github.com/user-attachments/assets/cdabf346-a176-44e3-bc94-dc1cc22cc26f" />
+샷을 추가하면 더욱 풍성한 포트폴리오가 됩니다!
 
 ---
 
