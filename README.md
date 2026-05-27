@@ -2,7 +2,7 @@
 
 > 에어코리아 실시간 API + 기상 데이터 기반 XGBoost 머신러닝 모델을 활용한 초미세먼지(PM2.5) 예측 웹 대시보드
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://배포링크를입력하세요.streamlit.app)
+[[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://배포링크를입력하세요.streamlit.app)](https://dust-project-yfyn5ghiz5kkma3wdmnic3.streamlit.app/)
 
 ---
 
