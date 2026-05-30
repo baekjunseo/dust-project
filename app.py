@@ -159,7 +159,7 @@ for col, lbl, val, unit, grade, color, icon in [
     (c4,'모델 정확도','91','%','XGBoost','#2ea043','&#129302;'),
 ]:
     with col:
-        st.markdown(f"<div class='card' style='text-align:center;'><div style='font-size:1.5rem;'>{icon}</div><div style='font-size:0.82rem; color:#8b949e;'>{lbl}</div><div style='font-size:2.5rem; font-weight:700; color:{color}; margin:10px 0;'>{val}</div><div style='font-size:0.8rem; color:#8b949e;'>{unit}</div><span class='badge' style='background:{color}22; color:{color}; border:1px solid {color}44;'>{grade}</span></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='card' style='text-align:center;'><div style='font-size:1.5rem; filter:brightness(0) invert(1);'>{icon}</div>><div style='font-size:0.82rem; color:#8b949e;'>{lbl}</div><div style='font-size:2.5rem; font-weight:700; color:{color}; margin:10px 0;'>{val}</div><div style='font-size:0.8rem; color:#8b949e;'>{unit}</div><span class='badge' style='background:{color}22; color:{color}; border:1px solid {color}44;'>{grade}</span></div>", unsafe_allow_html=True)
 
 dates_7 = [now + timedelta(days=i) for i in range(7)]
 pred_7 = [predict(rdf, d.month, d.day, 12, d.weekday(), current_pm25) for d in dates_7]
