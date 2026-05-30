@@ -21,7 +21,7 @@ st.markdown("""<style>
 .sec-title { font-size: 0.9rem; color: #8b949e; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
 .week-card { background: #0d1117; border: 1px solid #30363d; border-radius: 10px; padding: 14px 8px; text-align: center; margin: 4px; }
 .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 6px; }
-p, span, div, h1, h2, h3, h4, label { color: #e6edf3; }
+div[data-testid="stSelectbox"] label { color: #000000 !important; }
 </style>""", unsafe_allow_html=True)
 
 @st.cache_resource
@@ -166,8 +166,7 @@ pred_7 = [predict(rdf, d.month, d.day, 12, d.weekday(), current_pm25) for d in d
 pred_7_pm10 = [v*1.8 for v in pred_7]
 day_names = ['오늘','내일','모레','3일후','4일후','5일후','6일후']
 weekday_kr = ['월','화','수','목','금','토','일']
-weather_icons = ['&#9728;','&#9925;','&#9729;','&#127783;','&#127781;','&#9728;','&#9925;']
-
+weather_icons = ['','','','','','','']
 tab1, tab2 = st.tabs(['&#127787; 초미세먼지 PM2.5','&#127748; 미세먼지 PM10'])
 with tab1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
