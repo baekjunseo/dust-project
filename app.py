@@ -153,7 +153,7 @@ with open('voice.mp3','rb') as f:
 
 c1,c2,c3,c4 = st.columns(4)
 for col, lbl, val, unit, grade, color, icon in [
-    (c1,'실시간 PM2.5',f'{current_pm25:.0f}','μg/m³',rt_g,rt_c,'&#127787;'),
+    (c1,'실시간 PM2.5',f'{current_pm25:.0f}','μg/m³',rt_g,rt_c,'💨'),
     (c2,'내일 예측 PM2.5',f'{tmr_v:.0f}','μg/m³',tmr_g,tmr_c,'&#128197;'),
     (c3,'실시간 PM10',f'{current_pm10:.0f}','μg/m³',pm10_g,pm10_c,'&#127748;'),
     (c4,'모델 정확도','91','%','XGBoost','#2ea043','&#129302;'),
