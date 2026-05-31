@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import joblib
 import requests
-from gtts import gTTS
 from datetime import datetime, timedelta
 from sklearn.preprocessing import LabelEncoder
 import plotly.graph_objects as go
@@ -146,10 +145,14 @@ if rt_pm25:
 voice_txt = f"오늘 {selected} 초미세먼지는 {rt_g}입니다. 현재 농도 {current_pm25:.0f} 마이크로그램. 내일은 {tmr_v:.0f} 마이크로그램으로 {tmr_g} 예상됩니다."
 st.markdown(f"<div style='background:#1c2128; border:1px solid #238636; border-radius:10px; padding:14px 18px; margin-bottom:16px;'><div style='font-size:0.78rem; color:#8b949e; margin-bottom:5px;'>AI 음성 안내</div><div style='font-size:0.9rem; color:#e6edf3;'>\"{voice_txt}\"</div></div>", unsafe_allow_html=True)
 
-tts = gTTS(text=voice_txt, lang='ko')
-tts.save('voice.mp3')
-with open('voice.mp3','rb') as f:
-    st.audio(f.read(), format='audio/mp3', autoplay=True)
+st.components.v1.html(f"""
+<script>
+var msg = new SpeechSynthesisUtterance("{voice_txt}");
+msg.lang = 'ko-KR';
+msg.rate = 0.9;
+window.speechSynthesis.speak(msg);
+</script>
+""", height=0)
 
 c1,c2,c3,c4 = st.columns(4)
 for col, lbl, val, unit, grade, color, icon in [
