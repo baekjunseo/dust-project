@@ -216,17 +216,41 @@ with tab2:
 gl,gr = st.columns([3,2])
 with gl:
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=[d.strftime('%m/%d') for d in dates_7], y=pred_7,
-        marker_color=[get_grade(v)[1] for v in pred_7], text=[f'{v:.0f}' for v in pred_7],
-        textposition='outside', textfont=dict(color='#e6edf3', size=13), width=0.5))
-    for y,col,txt in [(15,'#2ea043','좋음(15)'),(35,'#d29922','보통(35)'),(75,'#f85149','나쁨(75)')]:
-        fig.add_hline(y=y, line_dash='dash', line_color=col, opacity=0.6, annotation_text=txt, annotation_font_color=col, annotation_position='right')
-    fig.update_layout(height=300, plot_bgcolor='#161b22', paper_bgcolor='#161b22',
-        font=dict(color='#8b949e',size=11), showlegend=False, margin=dict(l=0,r=80,t=30,b=0),
-        xaxis=dict(gridcolor='#30363d',color='#8b949e'),
-        yaxis=dict(gridcolor='#30363d',color='#8b949e',title='PM2.5 (μg/m³)',range=[0,max(pred_7)*1.4]))
+    fig.add_trace(go.Bar(
+        x=day_names,
+        y=pred_7,
+        marker_color=[get_grade(v)[1] for v in pred_7],
+        text=[f'{v:.0f}' for v in pred_7],
+        textposition='outside',
+        textfont=dict(color='#e6edf3', size=16),
+        width=0.5
+    ))
+    for y,col,txt in [(15,'#2ea043','좋음'),(35,'#d29922','보통'),(75,'#f85149','나쁨')]:
+        fig.add_hline(y=y, line_dash='dash', line_color=col, opacity=0.6,
+            annotation_text=txt, annotation_font_color=col,
+            annotation_position='right')
+    fig.update_layout(
+        height=350,
+        plot_bgcolor='#161b22',
+        paper_bgcolor='#161b22',
+        font=dict(color='#e6edf3', size=14),
+        showlegend=False,
+        margin=dict(l=10, r=60, t=40, b=10),
+        xaxis=dict(
+            gridcolor='#30363d',
+            color='#e6edf3',
+            tickfont=dict(size=14),
+            tickangle=0
+        ),
+        yaxis=dict(
+            gridcolor='#30363d',
+            color='#8b949e',
+            title='PM2.5 (μg/m³)',
+            range=[0, max(pred_7)*1.5]
+        )
+    )
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="sec-title">&#128202; 7일 PM2.5 예측 농도</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">📊 7일 PM2.5 예측 농도</div>', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
