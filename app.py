@@ -217,43 +217,38 @@ gl,gr = st.columns([3,2])
 with gl:
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=day_names,
-        y=pred_7,
+        x=pred_7,
+        y=day_names,
+        orientation='h',
         marker_color=[get_grade(v)[1] for v in pred_7],
-        text=[f'{v:.0f}' for v in pred_7],
+        text=[f'{v:.0f} μg/m³' for v in pred_7],
         textposition='outside',
-        textfont=dict(color='#e6edf3', size=16),
-        width=0.5
+        textfont=dict(color='#e6edf3', size=14),
     ))
-    for y,col,txt in [(15,'#2ea043','좋음'),(35,'#d29922','보통'),(75,'#f85149','나쁨')]:
-        fig.add_hline(y=y, line_dash='dash', line_color=col, opacity=0.6,
-            annotation_text=txt, annotation_font_color=col,
-            annotation_position='right')
     fig.update_layout(
         height=350,
         plot_bgcolor='#161b22',
         paper_bgcolor='#161b22',
-        font=dict(color='#e6edf3', size=14),
+        font=dict(color='#e6edf3', size=13),
         showlegend=False,
-        margin=dict(l=10, r=60, t=40, b=10),
+        margin=dict(l=10, r=80, t=20, b=10),
         xaxis=dict(
-            gridcolor='#30363d',
-            color='#e6edf3',
-            tickfont=dict(size=14),
-            tickangle=0
-        ),
-        yaxis=dict(
             gridcolor='#30363d',
             color='#8b949e',
             title='PM2.5 (μg/m³)',
-            range=[0, max(pred_7)*1.5]
+            range=[0, max(pred_7)*1.6]
+        ),
+        yaxis=dict(
+            gridcolor='#30363d',
+            color='#e6edf3',
+            tickfont=dict(size=14),
+            autorange='reversed'
         )
     )
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="sec-title">📊 7일 PM2.5 예측 농도</div>', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
-
 with gr:
     if rt_g in ['나쁨','매우나쁨']:
         guides = [('#f85149','&#128683;','외출 자제 권장','불필요한 외출은 삼가세요'),('#f0883e','&#128576;','KF94 마스크 착용','외출 시 반드시 착용하세요'),('#58a6ff','&#127968;','실내 활동 권장','운동은 실내에서 하세요'),('#8b949e','&#128168;','환기 자제','창문을 닫아두세요')]
