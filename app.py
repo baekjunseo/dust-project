@@ -167,27 +167,52 @@ pred_7_pm10 = [v*1.8 for v in pred_7]
 day_names = ['오늘','내일','모레','3일후','4일후','5일후','6일후']
 weekday_kr = ['월','화','수','목','금','토','일']
 weather_icons = ['','','','','','','']
-tab1, tab2 = st.tabs(['&#127787; 초미세먼지 PM2.5','&#127748; 미세먼지 PM10'])
+tab1, tab2 = st.tabs(['☁️ 초미세먼지 PM2.5','🌿 미세먼지 PM10'])
 with tab1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="sec-title">&#128197; {selected} 7일 PM2.5 예측</div>', unsafe_allow_html=True)
-    cols_7 = st.columns(7)
-    for i,(col,d,v,dn) in enumerate(zip(cols_7,dates_7,pred_7,day_names)):
+    st.markdown(f'<div class="sec-title">📅 {selected} 7일 PM2.5 예측</div>', unsafe_allow_html=True)
+    for i,(d,v,dn) in enumerate(zip(dates_7,pred_7,day_names)):
         g,c = get_grade(v)
-        with col:
-            st.markdown(f"<div class='week-card' style='border-top:3px solid {c};'><div style='font-size:0.78rem; color:#8b949e;'>{dn}</div><div style='font-size:0.78rem; color:#8b949e;'>{d.strftime('%m/%d')} ({weekday_kr[d.weekday()]})</div><div style='font-size:1.5rem; margin:6px 0;'>{weather_icons[i]}</div><div style='font-size:1.9rem; font-weight:700; color:{c};'>{v:.0f}</div><div style='font-size:0.72rem; color:#8b949e;'>μg/m³</div><span style='background:{c}22; color:{c}; border:1px solid {c}44; padding:2px 8px; border-radius:20px; font-size:0.72rem;'>{g}</span></div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style='background:#0d1117; border:1px solid #30363d; border-left:5px solid {c};
+        border-radius:10px; padding:14px 18px; margin-bottom:10px;
+        display:flex; justify-content:space-between; align-items:center;'>
+            <div>
+                <div style='font-size:1rem; font-weight:700; color:#e6edf3;'>{dn} {weather_icons[i]}</div>
+                <div style='font-size:0.82rem; color:#8b949e;'>{d.strftime('%m/%d')} ({weekday_kr[d.weekday()]})</div>
+            </div>
+            <div style='text-align:right;'>
+                <div style='font-size:1.8rem; font-weight:700; color:{c};'>{v:.0f}</div>
+                <div style='font-size:0.75rem; color:#8b949e;'>μg/m³</div>
+                <span style='background:{c}22; color:{c}; border:1px solid {c}44;
+                padding:2px 10px; border-radius:20px; font-size:0.78rem;'>{g}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with tab2:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="sec-title">&#128197; {selected} 7일 PM10 예측</div>', unsafe_allow_html=True)
-    cols_7b = st.columns(7)
-    for i,(col,d,v,dn) in enumerate(zip(cols_7b,dates_7,pred_7_pm10,day_names)):
+    st.markdown(f'<div class="sec-title">📅 {selected} 7일 PM10 예측</div>', unsafe_allow_html=True)
+    for i,(d,v,dn) in enumerate(zip(dates_7,pred_7_pm10,day_names)):
         g,c = get_grade_pm10(v)
-        with col:
-            st.markdown(f"<div class='week-card' style='border-top:3px solid {c};'><div style='font-size:0.78rem; color:#8b949e;'>{dn}</div><div style='font-size:0.78rem; color:#8b949e;'>{d.strftime('%m/%d')} ({weekday_kr[d.weekday()]})</div><div style='font-size:1.5rem; margin:6px 0;'>{weather_icons[i]}</div><div style='font-size:1.9rem; font-weight:700; color:{c};'>{v:.0f}</div><div style='font-size:0.72rem; color:#8b949e;'>μg/m³</div><span style='background:{c}22; color:{c}; border:1px solid {c}44; padding:2px 8px; border-radius:20px; font-size:0.72rem;'>{g}</span></div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style='background:#0d1117; border:1px solid #30363d; border-left:5px solid {c};
+        border-radius:10px; padding:14px 18px; margin-bottom:10px;
+        display:flex; justify-content:space-between; align-items:center;'>
+            <div>
+                <div style='font-size:1rem; font-weight:700; color:#e6edf3;'>{dn} {weather_icons[i]}</div>
+                <div style='font-size:0.82rem; color:#8b949e;'>{d.strftime('%m/%d')} ({weekday_kr[d.weekday()]})</div>
+            </div>
+            <div style='text-align:right;'>
+                <div style='font-size:1.8rem; font-weight:700; color:{c};'>{v:.0f}</div>
+                <div style='font-size:0.75rem; color:#8b949e;'>μg/m³</div>
+                <span style='background:{c}22; color:{c}; border:1px solid {c}44;
+                padding:2px 10px; border-radius:20px; font-size:0.78rem;'>{g}</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
-
 gl,gr = st.columns([3,2])
 with gl:
     fig = go.Figure()
