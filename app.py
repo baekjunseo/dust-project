@@ -151,17 +151,19 @@ st.components.v1.html(f"""
   msg.lang = 'ko-KR';
   msg.rate = 0.9;
   window.speechSynthesis.speak(msg);
+  this.style.background='#1a6e2a';
+  this.innerText='🔊 재생 중...';
 " style="
   background:#238636;
   color:white;
   border:none;
-  padding:8px 20px;
+  padding:10px 24px;
   border-radius:8px;
-  font-size:14px;
+  font-size:15px;
   cursor:pointer;
+  width:100%;
 ">🔊 음성 안내 듣기</button>
-""", height=50)
-
+""", height=60)
 c1,c2,c3,c4 = st.columns(4)
 for col, lbl, val, unit, grade, color, icon in [
     (c1,'실시간 PM2.5',f'{current_pm25:.0f}','μg/m³',rt_g,rt_c,'💨'),
