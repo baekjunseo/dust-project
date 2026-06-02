@@ -146,13 +146,21 @@ voice_txt = f"오늘 {selected} 초미세먼지는 {rt_g}입니다. 현재 농�
 st.markdown(f"<div style='background:#1c2128; border:1px solid #238636; border-radius:10px; padding:14px 18px; margin-bottom:16px;'><div style='font-size:0.78rem; color:#8b949e; margin-bottom:5px;'>AI 음성 안내</div><div style='font-size:0.9rem; color:#e6edf3;'>\"{voice_txt}\"</div></div>", unsafe_allow_html=True)
 
 st.components.v1.html(f"""
-<script>
-var msg = new SpeechSynthesisUtterance("{voice_txt}");
-msg.lang = 'ko-KR';
-msg.rate = 0.9;
-window.speechSynthesis.speak(msg);
-</script>
-""", height=0)
+<button onclick="
+  var msg = new SpeechSynthesisUtterance('{voice_txt}');
+  msg.lang = 'ko-KR';
+  msg.rate = 0.9;
+  window.speechSynthesis.speak(msg);
+" style="
+  background:#238636;
+  color:white;
+  border:none;
+  padding:8px 20px;
+  border-radius:8px;
+  font-size:14px;
+  cursor:pointer;
+">🔊 음성 안내 듣기</button>
+""", height=50)
 
 c1,c2,c3,c4 = st.columns(4)
 for col, lbl, val, unit, grade, color, icon in [
