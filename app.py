@@ -143,14 +143,7 @@ if rt_pm25:
     st.markdown(f"<div style='background:#1c2128; border:1px solid #30363d; border-radius:10px; padding:10px 16px; margin-bottom:12px;'><span style='color:#8b949e; font-size:0.82rem;'>&#x1F7E2; 실시간 연동 중 | 측정시각: {rt_time}</span></div>", unsafe_allow_html=True)
 
 voice_txt = f"오늘 {selected} 초미세먼지는 {rt_g}입니다. 현재 농도 {current_pm25:.0f} 마이크로그램. 내일은 {tmr_v:.0f} 마이크로그램으로 {tmr_g} 예상됩니다."
-st.markdown(f"<div style='background:#1c2128; border:1px solid #238636; border-radius:10px; padding:14px 18px; margin-bottom:16px;'><div style='font-size:0.78rem; color:#8b949e; margin-bottom:5px;'>AI 음성 안내</div><div style='font-size:0.9rem; color:#e6edf3;'>\"{voice_txt}\"</div></div>", unsafe_allow_html=True)
-
-try:
-    import urllib.parse
-    tts_url = f"https://translate.google.com/translate_tts?ie=UTF-8&q={urllib.parse.quote(voice_txt)}&tl=ko&client=tw-ob"
-    st.audio(tts_url, format='audio/mp3', autoplay=False)
-except:
-    st.warning("음성 서비스를 사용할 수 없습니다.")
+st.markdown(f"<div style='background:#1c2128; border:1px solid #238636; border-radius:10px; padding:14px 18px; margin-bottom:16px;'><div style='font-size:0.78rem; color:#8b949e; margin-bottom:5px;'>📢 실시간 안내</div><div style='font-size:0.9rem; color:#e6edf3;'>{voice_txt}</div></div>", unsafe_allow_html=True)
 c1,c2,c3,c4 = st.columns(4)
 for col, lbl, val, unit, grade, color, icon in [
     (c1,'실시간 PM2.5',f'{current_pm25:.0f}','μg/m³',rt_g,rt_c,'💨'),
