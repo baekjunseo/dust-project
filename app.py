@@ -146,24 +146,29 @@ voice_txt = f"오늘 {selected} 초미세먼지는 {rt_g}입니다. 현재 농�
 st.markdown(f"<div style='background:#1c2128; border:1px solid #238636; border-radius:10px; padding:14px 18px; margin-bottom:16px;'><div style='font-size:0.78rem; color:#8b949e; margin-bottom:5px;'>AI 음성 안내</div><div style='font-size:0.9rem; color:#e6edf3;'>\"{voice_txt}\"</div></div>", unsafe_allow_html=True)
 
 st.components.v1.html(f"""
-<button onclick="
+<button id="speakBtn" onclick="speakText()" style="
+  background:#238636; color:white; border:none;
+  padding:10px 24px; border-radius:8px;
+  font-size:15px; cursor:pointer; width:100%;
+">🔊 음성 안내 듣기</button>
+<div id="status" style="color:#8b949e; font-size:12px; margin-top:6px;"></div>
+<script>
+function speakText() {{
+  var status = document.getElementById('status');
+  if (!window.speechSynthesis) {{
+    status.innerText = '❌ 이 브라우저는 음성을 지원하지 않습니다';
+    return;
+  }}
+  status.innerText = '⏳ 재생 중...';
   var msg = new SpeechSynthesisUtterance('{voice_txt}');
   msg.lang = 'ko-KR';
   msg.rate = 0.9;
+  msg.onstart = function() {{ status.innerText = '🔊 재생 중...'; }};
+  msg.onerror = function(e) {{ status.innerText = '❌ 오류: ' + e.error; }};
   window.speechSynthesis.speak(msg);
-  this.style.background='#1a6e2a';
-  this.innerText='🔊 재생 중...';
-" style="
-  background:#238636;
-  color:white;
-  border:none;
-  padding:10px 24px;
-  border-radius:8px;
-  font-size:15px;
-  cursor:pointer;
-  width:100%;
-">🔊 음성 안내 듣기</button>
-""", height=60)
+}}
+</script>
+""", height=80)
 c1,c2,c3,c4 = st.columns(4)
 for col, lbl, val, unit, grade, color, icon in [
     (c1,'실시간 PM2.5',f'{current_pm25:.0f}','μg/m³',rt_g,rt_c,'💨'),
