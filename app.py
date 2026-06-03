@@ -161,7 +161,12 @@ for i, d in enumerate(dates_7):
         pred_7.append(current_pm25)  # 오늘은 실측값 그대로
     else:
         pred_7.append(predict(rdf, d.month, d.day, 12, d.weekday(), current_pm25))
-pred_7_pm10 = [v*1.8 for v in pred_7]
+pred_7_pm10 = []
+for i, v in enumerate(pred_7):
+    if i == 0:
+        pred_7_pm10.append(current_pm10)  # 오늘은 실측값
+    else:
+        pred_7_pm10.append(v * 1.8)
 day_names = ['오늘','내일','모레','3일후','4일후','5일후','6일후']
 weekday_kr = ['월','화','수','목','금','토','일']
 weather_icons = ['','','','','','','']
