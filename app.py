@@ -155,7 +155,12 @@ for col, lbl, val, unit, grade, color, icon in [
         st.markdown(f"<div class='card' style='text-align:center;'><div style='font-size:1.5rem;'>{icon}</div>><div style='font-size:0.82rem; color:#8b949e;'>{lbl}</div><div style='font-size:2.5rem; font-weight:700; color:{color}; margin:10px 0;'>{val}</div><div style='font-size:0.8rem; color:#8b949e;'>{unit}</div><span class='badge' style='background:{color}22; color:{color}; border:1px solid {color}44;'>{grade}</span></div>", unsafe_allow_html=True)
 
 dates_7 = [now + timedelta(days=i) for i in range(7)]
-pred_7 = [predict(rdf, d.month, d.day, 12, d.weekday(), current_pm25) for d in dates_7]
+pred_7 = []
+for i, d in enumerate(dates_7):
+    if i == 0:
+        pred_7.append(current_pm25)  # 오늘은 실측값 그대로
+    else:
+        pred_7.append(predict(rdf, d.month, d.day, 12, d.weekday(), current_pm25))
 pred_7_pm10 = [v*1.8 for v in pred_7]
 day_names = ['오늘','내일','모레','3일후','4일후','5일후','6일후']
 weekday_kr = ['월','화','수','목','금','토','일']
