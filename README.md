@@ -22,7 +22,7 @@
 |------|------|
 | 언어 | Python |
 | 데이터 수집 | 에어코리아 API, 기상청 API |
-| 데이터 분석 | Pandas, NumPy |
+| 데이터 분석 | 판다스, 넘파이 |
 | 머신러닝 | XGBoost, Scikit-learn |
 | 시각화 | Plotly, Streamlit |
 | 배포 | Streamlit Cloud, GitHub |
