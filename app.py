@@ -71,13 +71,13 @@ def get_season_str(m):
 
 def get_grade(v):
     if v <= 15: return '좋음', '#2ea043'
-    elif v <= 35: return '보통', '#d29922'
+    elif v <= 35: return '보통', '#58a6ff'
     elif v <= 75: return '나쁨', '#f0883e'
     else: return '매우나쁨', '#f85149'
 
 def get_grade_pm10(v):
     if v <= 30: return '좋음', '#2ea043'
-    elif v <= 80: return '보통', '#d29922'
+    elif v <= 80: return '보통', '#58a6ff'
     elif v <= 150: return '나쁨', '#f0883e'
     else: return '매우나쁨', '#f85149'
 
@@ -256,7 +256,7 @@ with gr:
     if rt_g in ['나쁨','매우나쁨']:
         guides = [('#f85149','&#128683;','외출 자제 권장','불필요한 외출은 삼가세요'),('#f0883e','&#128576;','KF94 마스크 착용','외출 시 반드시 착용하세요'),('#58a6ff','&#127968;','실내 활동 권장','운동은 실내에서 하세요'),('#8b949e','&#128168;','환기 자제','창문을 닫아두세요')]
     elif rt_g == '보통':
-        guides = [('#d29922','&#128084;','마스크 권장','민감군은 마스크를 착용하세요'),('#58a6ff','&#127939;','야외활동 주의','장시간 야외활동 자제하세요'),('#2ea043','&#128168;','환기 가능','잠깐씩 환기하세요')]
+        guides = [('#58a6ff','&#128084;','마스크 권장','민감군은 마스크를 착용하세요'),('#58a6ff','&#127939;','야외활동 주의','장시간 야외활동 자제하세요'),('#2ea043','&#128168;','환기 가능','잠깐씩 환기하세요')]
     else:
         guides = [('#2ea043','&#127774;','외출하기 좋은 날','야외활동을 즐기세요'),('#2ea043','&#128168;','환기 권장','창문을 열어 환기하세요'),('#58a6ff','&#127939;','운동하기 좋은 날','야외 운동을 즐기세요')]
     st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -283,19 +283,30 @@ with al:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with ar:
-    lm = df[(df['region_key']==selected)&(df['date'].dt.month==(now.month-1 if now.month>1 else 12))]['PM25_avg'].mean()
-    ly = df[(df['region_key']==selected)&(df['date'].dt.year==now.year-1)&(df['date'].dt.month==now.month)]['PM25_avg'].mean()
+    # 과거 비교: 데이터가 있는 가장 최근 해의 같은 달 평균을 사용 (데이터가 없으면 '데이터 없음')
+    rd_sel = df[df['region_key']==selected]
+    def same_month_avg(month):
+        s = rd_sel[rd_sel['date'].dt.month==month]
+        if s.empty:
+            return np.nan, ''
+        y = s['date'].dt.year.max()
+        return s[s['date'].dt.year==y]['PM25_avg'].mean(), f"{y}년 {month}월 평균"
+    prev_month = now.month-1 if now.month>1 else 12
+    lm, lm_lbl = same_month_avg(prev_month)
+    ly, ly_lbl = same_month_avg(now.month)
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="sec-title">&#128197; 과거 대비 비교</div>', unsafe_allow_html=True)
-    for lbl,val,diff_v in [('현재 실시간',current_pm25,None),('지난달 평균',lm,current_pm25-lm),('작년 같은달',ly,current_pm25-ly)]:
-        diff_html = f"<div style='font-size:0.82rem; color:{'#f85149' if diff_v>0 else '#2ea043'}; margin-top:5px;'>{'▲' if diff_v>0 else '▼'} {abs(diff_v):.0f} μg/m³ {'높음' if diff_v>0 else '낮음'}</div>" if diff_v is not None else ''
-        st.markdown(f"<div class='inner-card'><div style='font-size:0.8rem; color:#8b949e;'>{lbl}</div><div style='font-size:1.9rem; font-weight:700; color:{rt_c};'>{val:.0f}<span style='font-size:0.85rem; color:#8b949e;'> μg/m³</span></div>{diff_html}</div>", unsafe_allow_html=True)
+    for lbl,val,diff_v in [('현재 실시간',current_pm25,None),(lm_lbl or '지난달 평균',lm,current_pm25-lm),(ly_lbl or '작년 같은달',ly,current_pm25-ly)]:
+        ok = diff_v is not None and not pd.isna(diff_v)
+        diff_html = f"<div style='font-size:0.82rem; color:{'#f85149' if diff_v>0 else '#2ea043'}; margin-top:5px;'>{'▲' if diff_v>0 else '▼'} {abs(diff_v):.0f} μg/m³ {'높음' if diff_v>0 else '낮음'}</div>" if ok else ''
+        val_html = "<span style='font-size:1.1rem; color:#8b949e;'>데이터 없음</span>" if pd.isna(val) else f"{val:.0f}<span style='font-size:0.85rem; color:#8b949e;'> μg/m³</span>"
+        st.markdown(f"<div class='inner-card'><div style='font-size:0.8rem; color:#8b949e;'>{lbl}</div><div style='font-size:1.9rem; font-weight:700; color:{rt_c};'>{val_html}</div>{diff_html}</div>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.markdown('<div class="sec-title">&#128204; PM2.5 등급 기준</div>', unsafe_allow_html=True)
 gc1,gc2,gc3,gc4 = st.columns(4)
-for col,g,c,rng,desc,icon in [(gc1,'좋음','#2ea043','0~15 μg/m³','야외활동 자유','&#128994;'),(gc2,'보통','#d29922','16~35 μg/m³','민감군 주의','&#129000;'),(gc3,'나쁨','#f0883e','36~75 μg/m³','마스크 착용','&#128993;'),(gc4,'매우나쁨','#f85149','76+ μg/m³','외출 자제','&#128308;')]:
+for col,g,c,rng,desc,icon in [(gc1,'좋음','#2ea043','0~15 μg/m³','야외활동 자유','&#128994;'),(gc2,'보통','#58a6ff','16~35 μg/m³','민감군 주의','&#128309;'),(gc3,'나쁨','#f0883e','36~75 μg/m³','마스크 착용','&#128992;'),(gc4,'매우나쁨','#f85149','76+ μg/m³','외출 자제','&#128308;')]:
     with col:
         st.markdown(f"<div style='background:#0d1117; border:1px solid {c}44; border-radius:10px; padding:16px; text-align:center; border-top:3px solid {c};'><div style='font-size:1.6rem;'>{icon}</div><div style='font-size:1rem; font-weight:700; color:{c};'>{g}</div><div style='font-size:0.85rem; color:#e6edf3;'>{rng}</div><div style='font-size:0.78rem; color:#8b949e;'>{desc}</div></div>", unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
