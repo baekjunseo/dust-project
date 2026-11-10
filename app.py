@@ -283,24 +283,23 @@ with al:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with ar:
-    # 과거 비교: 데이터가 있는 가장 최근 해의 같은 달 평균을 사용 (데이터가 없으면 '데이터 없음')
+    # 과거 비교: 같은 달(예: 11월)을 연도별로 나란히 비교 (학습 데이터 범위 안의 최근 2개 연도)
     rd_sel = df[df['region_key']==selected]
-    def same_month_avg(month):
-        s = rd_sel[rd_sel['date'].dt.month==month]
-        if s.empty:
-            return np.nan, ''
-        y = s['date'].dt.year.max()
-        return s[s['date'].dt.year==y]['PM25_avg'].mean(), f"{y}년 {month}월 평균"
-    prev_month = now.month-1 if now.month>1 else 12
-    lm, lm_lbl = same_month_avg(prev_month)
-    ly, ly_lbl = same_month_avg(now.month)
+    same_m = rd_sel[rd_sel['date'].dt.month==now.month]
+    by_year = same_m.groupby(same_m['date'].dt.year)['PM25_avg'].mean().sort_index(ascending=False).head(2)
+    rows = [('현재 실시간', current_pm25, None)]
+    for y, v in by_year.items():
+        rows.append((f"{y}년 {now.month}월 평균", v, current_pm25 - v))
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="sec-title">&#128197; 과거 대비 비교</div>', unsafe_allow_html=True)
-    for lbl,val,diff_v in [('현재 실시간',current_pm25,None),(lm_lbl or '지난달 평균',lm,current_pm25-lm),(ly_lbl or '작년 같은달',ly,current_pm25-ly)]:
-        ok = diff_v is not None and not pd.isna(diff_v)
-        diff_html = f"<div style='font-size:0.82rem; color:{'#f85149' if diff_v>0 else '#2ea043'}; margin-top:5px;'>{'▲' if diff_v>0 else '▼'} {abs(diff_v):.0f} μg/m³ {'높음' if diff_v>0 else '낮음'}</div>" if ok else ''
-        val_html = "<span style='font-size:1.1rem; color:#8b949e;'>데이터 없음</span>" if pd.isna(val) else f"{val:.0f}<span style='font-size:0.85rem; color:#8b949e;'> μg/m³</span>"
-        st.markdown(f"<div class='inner-card'><div style='font-size:0.8rem; color:#8b949e;'>{lbl}</div><div style='font-size:1.9rem; font-weight:700; color:{rt_c};'>{val_html}</div>{diff_html}</div>", unsafe_allow_html=True)
+    st.markdown(f'<div class="sec-title">&#128197; 과거 대비 비교 · 같은 달({now.month}월)</div>', unsafe_allow_html=True)
+    for lbl, val, diff_v in rows:
+        diff_html = ''
+        if diff_v is not None and not pd.isna(diff_v):
+            diff_html = f"<div style='font-size:0.82rem; color:{'#f85149' if diff_v>0 else '#2ea043'}; margin-top:5px;'>{'▲' if diff_v>0 else '▼'} {abs(diff_v):.0f} μg/m³ {'높음' if diff_v>0 else '낮음'}</div>"
+        st.markdown(f"<div class='inner-card'><div style='font-size:0.8rem; color:#8b949e;'>{lbl}</div><div style='font-size:1.9rem; font-weight:700; color:{rt_c};'>{val:.0f}<span style='font-size:0.85rem; color:#8b949e;'> μg/m³</span></div>{diff_html}</div>", unsafe_allow_html=True)
+    if len(rows) == 1:
+        st.markdown("<div style='font-size:0.8rem; color:#8b949e;'>같은 달 데이터가 없습니다.</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:0.75rem; color:#8b949e;'>※ 학습 데이터(2023.1~2025.10) 기준</div>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="card">', unsafe_allow_html=True)
