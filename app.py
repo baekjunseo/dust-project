@@ -269,10 +269,15 @@ al,ar = st.columns([3,2])
 with al:
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown('<div class="sec-title">&#128269; 원인 분석</div>', unsafe_allow_html=True)
+    # 기상 요인: 오늘 실시간 값이 아니므로, 저장된 기상청 데이터의 '이번 달(같은 계절) 평균'을 참고 지표로 표시
+    wx_src = df[(df['region_key']==selected) & (df['date'].dt.month==now.month)]
+    wx = wx_src[['ws_avg','hm_avg','pa_avg']].mean()
+    if wx.isna().any():
+        wx = latest[['ws_avg','hm_avg','pa_avg']]
     factors = [
-        ('&#128168; 풍속', latest['ws_avg']/10*100, f"{latest['ws_avg']:.1f} m/s", '낮을수록 나쁨'),
-        ('&#128167; 습도', latest['hm_avg'], f"{latest['hm_avg']:.0f}%", '높을수록 정체'),
-        ('&#127783; 기압', (latest['pa_avg']-980)/60*100, f"{latest['pa_avg']:.0f} hPa", '높을수록 정체'),
+        (f'&#128168; 풍속 ({now.month}월 평균)', 100 - wx['ws_avg']/10*100, f"{wx['ws_avg']:.1f} m/s", '낮을수록 나쁨'),
+        (f'&#128167; 습도 ({now.month}월 평균)', wx['hm_avg'], f"{wx['hm_avg']:.0f}%", '높을수록 정체'),
+        (f'&#127783; 기압 ({now.month}월 평균)', (wx['pa_avg']-980)/60*100, f"{wx['pa_avg']:.0f} hPa", '높을수록 정체'),
         ('&#127807; PM2.5', min(current_pm25/80*100,100), f"{current_pm25:.0f} μg/m³", '전날 농도 영향'),
         ('&#127968; 계절', 75 if now.month in [12,1,2,3] else 30, get_season_str(now.month), '겨울/봄 높음'),
     ]
@@ -280,6 +285,7 @@ with al:
         pct = min(max(pct,0),100)
         c = '#f85149' if pct>70 else '#f0883e' if pct>40 else '#58a6ff'
         st.markdown(f"<div style='margin-bottom:14px;'><div style='display:flex; justify-content:space-between; margin-bottom:5px;'><span style='font-size:0.85rem; color:#e6edf3;'>{name} <span style='font-size:0.75rem; color:#8b949e;'>{hint}</span></span><span style='font-size:0.85rem; color:{c};'>{display}</span></div><div style='background:#0d1117; border-radius:6px; height:8px;'><div style='width:{pct}%; height:100%; background:{c}; border-radius:6px;'></div></div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='font-size:0.75rem; color:#8b949e;'>※ 막대는 미세먼지 정체 위험 정도 · 풍속·습도·기압은 기상청 학습 데이터({df['date'].min():%Y.%m}~{df['date'].max():%Y.%m})의 {now.month}월 평균, PM2.5는 실시간</div>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with ar:
