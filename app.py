@@ -149,10 +149,10 @@ for col, lbl, val, unit, grade, color, icon in [
     (c1,'실시간 PM2.5',f'{current_pm25:.0f}','μg/m³',rt_g,rt_c,'💨'),
     (c2,'내일 예측 PM2.5',f'{tmr_v:.0f}','μg/m³',tmr_g,tmr_c,'&#128197;'),
     (c3,'실시간 PM10',f'{current_pm10:.0f}','μg/m³',pm10_g,pm10_c,'&#127748;'),
-    (c4,'모델 정확도','91','%','XGBoost','#2ea043','&#129302;'),
+    (c4,'모델 설명력 (R²)','0.91','결정계수 · 1에 가까울수록 좋음','XGBoost','#2ea043','&#129302;'),
 ]:
     with col:
-        st.markdown(f"<div class='card' style='text-align:center;'><div style='font-size:1.5rem;'>{icon}</div>><div style='font-size:0.82rem; color:#8b949e;'>{lbl}</div><div style='font-size:2.5rem; font-weight:700; color:{color}; margin:10px 0;'>{val}</div><div style='font-size:0.8rem; color:#8b949e;'>{unit}</div><span class='badge' style='background:{color}22; color:{color}; border:1px solid {color}44;'>{grade}</span></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='card' style='text-align:center;'><div style='font-size:1.5rem;'>{icon}</div><div style='font-size:0.82rem; color:#8b949e;'>{lbl}</div><div style='font-size:2.5rem; font-weight:700; color:{color}; margin:10px 0;'>{val}</div><div style='font-size:0.8rem; color:#8b949e;'>{unit}</div><span class='badge' style='background:{color}22; color:{color}; border:1px solid {color}44;'>{grade}</span></div>", unsafe_allow_html=True)
 
 dates_7 = [now + timedelta(days=i) for i in range(7)]
 pred_7 = []
@@ -319,7 +319,5 @@ for col,g,c,rng,desc,icon in [(gc1,'좋음','#2ea043','0~15 μg/m³','야외활�
     with col:
         st.markdown(f"<div style='background:#0d1117; border:1px solid {c}44; border-radius:10px; padding:16px; text-align:center; border-top:3px solid {c};'><div style='font-size:1.6rem;'>{icon}</div><div style='font-size:1rem; font-weight:700; color:{c};'>{g}</div><div style='font-size:0.85rem; color:#e6edf3;'>{rng}</div><div style='font-size:0.78rem; color:#8b949e;'>{desc}</div></div>", unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown("<div style='text-align:center; color:#8b949e; font-size:0.8rem; padding:20px 0;'>데이터: 에어코리아 + 기상청 &nbsp;|&nbsp; AI: XGBoost &nbsp;|&nbsp; R² Score: 0.91</div>", unsafe_allow_html=True)
 
 st.markdown("<div style='text-align:center; color:#8b949e; font-size:0.8rem; padding:20px 0;'>데이터: 에어코리아 + 기상청 &nbsp;|&nbsp; AI: XGBoost &nbsp;|&nbsp; R² Score: 0.91</div>", unsafe_allow_html=True)
