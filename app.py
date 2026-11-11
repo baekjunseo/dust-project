@@ -295,17 +295,11 @@ with ar:
     d_start = d_end - pd.DateOffset(years=1) + pd.Timedelta(days=1)
     win = rd_sel[(rd_sel['date']>=d_start) & (rd_sel['date']<d_end + pd.Timedelta(days=1))]
     avg_1y = win['PM25_avg'].mean()
-    # 최근 1개월: 학습 데이터의 마지막 달(예: 2025.10) 평균
-    m_start = d_end.replace(day=1)
-    win_m = rd_sel[(rd_sel['date']>=m_start) & (rd_sel['date']<d_end + pd.Timedelta(days=1))]
-    avg_1m = win_m['PM25_avg'].mean()
     rows = [('현재 실시간', current_pm25, None)]
-    if not pd.isna(avg_1m):
-        rows.append((f"최근 1개월 평균 ({d_end:%Y.%m})", avg_1m, current_pm25 - avg_1m))
     if not pd.isna(avg_1y):
         rows.append((f"최근 1년 평균 ({d_start:%Y.%m}~{d_end:%Y.%m})", avg_1y, current_pm25 - avg_1y))
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="sec-title">&#128197; 과거 대비 비교 · 최근 1개월·1년 평균</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">&#128197; 과거 대비 비교 · 최근 1년 평균</div>', unsafe_allow_html=True)
     for lbl, val, diff_v in rows:
         diff_html = ''
         if diff_v is not None and not pd.isna(diff_v):
@@ -315,7 +309,7 @@ with ar:
         st.markdown(f"<div class='inner-card'><div style='font-size:0.8rem; color:#8b949e;'>{lbl}</div><div style='font-size:1.9rem; font-weight:700; color:{val_c};'>{val_fmt}<span style='font-size:0.85rem; color:#8b949e;'> μg/m³</span></div>{diff_html}</div>", unsafe_allow_html=True)
     if len(rows) == 1:
         st.markdown("<div style='font-size:0.8rem; color:#8b949e;'>비교할 데이터가 없습니다.</div>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size:0.75rem; color:#8b949e;'>※ 학습 데이터 기준 최근 1개월·12개월 평균과 현재 농도 비교</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:0.75rem; color:#8b949e;'>※ 학습 데이터 기준 최근 12개월 평균과 현재 농도 비교</div>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -327,6 +321,5 @@ for col,g,c,rng,desc,icon in [(gc1,'좋음','#2ea043','0~15 μg/m³','야외활�
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<div style='text-align:center; color:#8b949e; font-size:0.8rem; padding:20px 0;'>데이터: 에어코리아 + 기상청 &nbsp;|&nbsp; AI: XGBoost &nbsp;|&nbsp; R² Score: 0.91</div>", unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<div style='text-align:center; color:#8b949e; font-size:0.8rem; padding:20px 0;'>데이터: 에어코리아 + 기상청 &nbsp;|&nbsp; AI: XGBoost &nbsp;|&nbsp; R² Score: 0.91</div>", unsafe_allow_html=True)
