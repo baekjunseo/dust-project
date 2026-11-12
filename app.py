@@ -89,6 +89,10 @@ def predict(rdf, month, day, hour, weekday, pm25_now=None):
     lag24 = rdf['PM25_avg'].iloc[-7] if len(rdf) >= 7 else lag1
     avg6 = rdf['PM25_avg'].tail(6).mean()
     avg24 = rdf['PM25_avg'].tail(24).mean() if len(rdf) >= 7 else lag1
+    if pm25_now:
+        # 실시간 값이 있을 때: 저장 데이터(과거 시점)의 이력과 실시간 값이 섞이지 않도록,
+        # 최근 농도 이력도 현재 농도 수준으로 가정해 입력의 시점을 맞춘다.
+        lag3 = lag24 = avg6 = avg24 = pm25_now
     pm10 = rdf['PM10_avg'].mean()
 
     p = {
