@@ -81,7 +81,7 @@ def get_grade_pm10(v):
     elif v <= 150: return '나쁨', '#f0883e'
     else: return '매우나쁨', '#f85149'
 
-def predict(rdf, month, day, hour, weekday, pm25_now=None):
+def predict(rdf, month, day, hour, weekday, pm25_now=None, pm10_now=None):
     lag1 = pm25_now if pm25_now else rdf['PM25_avg'].iloc[-1]
     # 없는 컬럼은 있는 데이터로 근사
     lag3 = rdf['PM25_avg'].iloc[-3] if len(rdf) >= 3 else lag1
@@ -89,11 +89,8 @@ def predict(rdf, month, day, hour, weekday, pm25_now=None):
     lag24 = rdf['PM25_avg'].iloc[-7] if len(rdf) >= 7 else lag1
     avg6 = rdf['PM25_avg'].tail(6).mean()
     avg24 = rdf['PM25_avg'].tail(24).mean() if len(rdf) >= 7 else lag1
-    if pm25_now:
-        # 실시간 값이 있을 때: 저장 데이터(과거 시점)의 이력과 실시간 값이 섞이지 않도록,
-        # 최근 농도 이력도 현재 농도 수준으로 가정해 입력의 시점을 맞춘다.
-        lag3 = lag24 = avg6 = avg24 = pm25_now
-    pm10 = rdf['PM10_avg'].mean()
+    # PM10: 실시간 값이 있으면 사용(저장 데이터는 과거 시점이라 PM2.5 실시간 값과 시점이 어긋남)
+    pm10 = pm10_now if (pm10_now is not None and not pd.isna(pm10_now)) else rdf['PM10_avg'].mean()
 
     p = {
         'month': month,
@@ -135,9 +132,9 @@ latest = rdf.iloc[-1]
 current_pm25 = rt_pm25 if rt_pm25 else rdf['PM25_avg'].iloc[-1]
 current_pm10 = rt_pm10 if rt_pm10 else latest['PM10_avg']
 
-today_v = predict(rdf, now.month, now.day, now.hour, now.weekday(), current_pm25)
+today_v = predict(rdf, now.month, now.day, now.hour, now.weekday(), current_pm25, current_pm10)
 tmr = now + timedelta(days=1)
-tmr_v = predict(rdf, tmr.month, tmr.day, 12, tmr.weekday(), current_pm25)
+tmr_v = predict(rdf, tmr.month, tmr.day, 12, tmr.weekday(), current_pm25, current_pm10)
 today_g, today_c = get_grade(today_v)
 tmr_g, tmr_c = get_grade(tmr_v)
 rt_g, rt_c = get_grade(current_pm25)
@@ -164,7 +161,7 @@ for i, d in enumerate(dates_7):
     if i == 0:
         pred_7.append(current_pm25)  # 오늘은 실측값 그대로
     else:
-        pred_7.append(predict(rdf, d.month, d.day, 12, d.weekday(), current_pm25))
+        pred_7.append(predict(rdf, d.month, d.day, 12, d.weekday(), current_pm25, current_pm10))
 pred_7_pm10 = []
 for i, v in enumerate(pred_7):
     if i == 0:
